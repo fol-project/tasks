@@ -11,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 trait PageRender
 {
-    function taskPageRender()
+    public function taskPageRender()
     {
         return new PageRenderTask($this->app);
     }
@@ -19,113 +19,113 @@ trait PageRender
 
 class PageRenderTask implements TaskInterface
 {
-	protected $templates;
-	protected $origin;
-	protected $destination;
+    protected $templates;
+    protected $origin;
+    protected $destination;
 
-	/**
-	 * Set the template engine
-	 * 
-	 * @param string|Engine $templates
-	 * 
-	 * @return $this
-	 */
-	public function templates($templates)
-	{
-		if ($templates instanceof Engine) {
-			$this->templates = $templates;
-		} else {
-			$this->templates = new Engine($templates);
-		}
+    /**
+     * Set the template engine
+     *
+     * @param string|Engine $templates
+     *
+     * @return $this
+     */
+    public function templates($templates)
+    {
+        if ($templates instanceof Engine) {
+            $this->templates = $templates;
+        } else {
+            $this->templates = new Engine($templates);
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set the origin path of the pages
-	 * 
-	 * @param string $origin
-	 * 
-	 * @return $this
-	 */
-	public function origin($origin)
-	{
-		$this->origin = $origin;
+    /**
+     * Set the origin path of the pages
+     *
+     * @param string $origin
+     *
+     * @return $this
+     */
+    public function origin($origin)
+    {
+        $this->origin = $origin;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set the destination path of the pages
-	 * 
-	 * @param string $destination
-	 * 
-	 * @return $this
-	 */
-	public function destination($destination)
-	{
-		$this->destination = $destination;
+    /**
+     * Set the destination path of the pages
+     *
+     * @param string $destination
+     *
+     * @return $this
+     */
+    public function destination($destination)
+    {
+        $this->destination = $destination;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Run the task
-	 */
-	public function run()
-	{
-		foreach ($this->getPages() as $page) {
-			$this->render($page);
-		}
+    /**
+     * Run the task
+     */
+    public function run()
+    {
+        foreach ($this->getPages() as $page) {
+            $this->render($page);
+        }
 
-		return Result::success($this);
-	}
+        return Result::success($this);
+    }
 
-	/**
-	 * Scan the data directory searching by data pages
-	 * 
-	 * @return array
-	 */
-	protected function getPages()
-	{
-		$cwd = getcwd();
-		chdir($this->origin);
-		$files = glob('{*.yml,*.yaml,*.json,*.php}', GLOB_BRACE);
-		chdir($cwd);
+    /**
+     * Scan the data directory searching by data pages
+     *
+     * @return array
+     */
+    protected function getPages()
+    {
+        $cwd = getcwd();
+        chdir($this->origin);
+        $files = glob('{*.yml,*.yaml,*.json,*.php}', GLOB_BRACE);
+        chdir($cwd);
 
-		return $files;
-	}
+        return $files;
+    }
 
-	protected function render($file)
-	{
-		$data = $this->getData($file);
+    protected function render($file)
+    {
+        $data = $this->getData($file);
 
-		if (empty($data['template'])) {
-			return;
-		}
+        if (empty($data['template'])) {
+            return;
+        }
 
-		$content = $this->templates->render($data['template'], $data);
+        $content = $this->templates->render($data['template'], $data);
 
-		$dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', '.html', $file);
-		$dest = "{$this->destination}/{$dest}";
+        $dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', '.html', $file);
+        $dest = "{$this->destination}/{$dest}";
 
-		file_put_contents($dest, $content);
-	}
+        file_put_contents($dest, $content);
+    }
 
-	/**
-	 * Extract and returns the data form a file
-	 * 
-	 * @return null|array
-	 */
-	protected function getData($path)
-	{
-		$file = "{$this->origin}/{$path}";
+    /**
+     * Extract and returns the data form a file
+     *
+     * @return null|array
+     */
+    protected function getData($path)
+    {
+        $file = "{$this->origin}/{$path}";
 
-		if (!is_file($file)) {
-			throw new \Exception("The file {$file} does not exist");
-		}
+        if (!is_file($file)) {
+            throw new \Exception("The file {$file} does not exist");
+        }
 
-		switch (pathinfo($path, PATHINFO_EXTENSION)) {
+        switch (pathinfo($path, PATHINFO_EXTENSION)) {
             case 'yml':
             case 'yaml':
                 return Yaml::parse($file);
@@ -136,5 +136,5 @@ class PageRenderTask implements TaskInterface
             case 'php':
                 return include $file;
         }
-	}
+    }
 }
