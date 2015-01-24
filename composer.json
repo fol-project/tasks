@@ -1,0 +1,31 @@
+{
+	"name": "fol/tasks",
+	"type": "library",
+	"description": "Robo tasks for Fol framework",
+	"keywords": ["http"],
+	"homepage": "https://github.com/fol-project/tasks",
+	"license": "AGPL-3.0",
+	"authors": [
+		{
+			"name": "Oscar Otero",
+			"email": "oom@oscarotero.com",
+			"homepage": "http://oscarotero.com",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"email": "oom@oscarotero.com",
+		"issues": "https://github.com/fol-project/tasks/issues"
+	},
+	"require": {
+		"php": ">=5.5.0",
+		"codegyre/robo": "0.5.*",
+        "league/plates": "~3.1",
+        "symfony/yaml": "~2.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"Fol\\Tasks\\": "src/"
+		}
+	}
+}
