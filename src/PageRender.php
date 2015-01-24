@@ -13,7 +13,7 @@ trait PageRender
 {
     public function taskPageRender()
     {
-        return new PageRenderTask($this->app);
+        return new PageRenderTask();
     }
 }
 
@@ -96,6 +96,11 @@ class PageRenderTask implements TaskInterface
         return $files;
     }
 
+    /**
+     * Render a page and generate the output file
+     * 
+     * @param string $file The file containing the data
+     */
     protected function render($file)
     {
         $data = $this->getData($file);
