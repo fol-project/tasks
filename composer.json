@@ -4,7 +4,7 @@
 	"description": "Robo tasks for Fol framework",
 	"keywords": ["http"],
 	"homepage": "https://github.com/fol-project/tasks",
-	"license": "AGPL-3.0",
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Oscar Otero",
