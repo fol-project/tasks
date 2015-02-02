@@ -98,7 +98,7 @@ class PageRenderTask implements TaskInterface
 
     /**
      * Render a page and generate the output file
-     * 
+     *
      * @param string $file The file containing the data
      */
     protected function render($file)

@@ -21,7 +21,7 @@ class PhpRenderTask implements TaskInterface
 
     /**
      * Set an input/output php render
-     * 
+     *
      * @param string $input
      * @param string $output
      */
@@ -41,7 +41,7 @@ class PhpRenderTask implements TaskInterface
             list($input, $output) = $file;
 
             ob_start();
-            include($input);
+            include $input;
 
             file_put_contents($output, ob_get_clean());
         }
