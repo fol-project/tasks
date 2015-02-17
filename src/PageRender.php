@@ -11,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 trait PageRender
 {
-    public function taskPageRender()
+    protected function taskPageRender()
     {
         return new PageRenderTask();
     }

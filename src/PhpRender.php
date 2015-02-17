@@ -9,7 +9,7 @@ use Robo\Contract\TaskInterface;
  */
 trait PhpRender
 {
-    public function taskPhpRender()
+    protected function taskPhpRender()
     {
         return new PhpRenderTask();
     }
