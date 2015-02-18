@@ -37,9 +37,9 @@ class ConfigTask extends BaseTask implements TaskInterface
     /**
      * Overwrite previous variables
      *
-     * @param string|array $input     The filepath or an array with the config
-     * @param string       $output    The filename where to export the config
-     * @param array|null   $filter    Filter the values to asking for
+     * @param string|array $input  The filepath or an array with the config
+     * @param string       $output The filename where to export the config
+     * @param array|null   $filter Filter the values to asking for
      */
     public function overwrite($input, $output, $filter = null)
     {
@@ -89,7 +89,7 @@ class ConfigTask extends BaseTask implements TaskInterface
 
     /**
      * Ask to the user for a specific config value
-     * 
+     *
      * @param string     $basename
      * @param string     $name
      * @param mixed      &$value
@@ -100,7 +100,7 @@ class ConfigTask extends BaseTask implements TaskInterface
     private function askConfig($basename, $name, &$value, $overwrite, array $oldValues = null, array $filter = null)
     {
         if (is_array($value)) {
-            foreach($value as $n => &$v) {
+            foreach ($value as $n => &$v) {
                 $this->askConfig("{$basename}{$name}.", $n, $v, $overwrite, isset($oldValues[$name]) ? $oldValues[$name] : null, $filter);
             }
         } else {
