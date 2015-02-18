@@ -1,15 +1,12 @@
 <?php
 namespace Fol\Tasks;
 
-use Robo\Config;
-use Symfony\Component\Console\Output\ConsoleOutput;
-
 class Runner extends \Robo\Runner
 {
 	public function execute($class = null, array $argv = null)
 	{
 		// Share the output object
-		Config::setOutput(new ConsoleOutput());
+		\Robo\Config::setOutput(new \Symfony\Component\Console\Output\ConsoleOutput());
 
 		// Make sure the class is actually loaded.
 		if (!class_exists($class))

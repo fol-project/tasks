@@ -5,7 +5,7 @@ use Robo\Tasks as BaseTasks;
 
 class Tasks extends BaseTasks
 {
-    use EnvironmentVariables;
+    use Config;
     use PageRender;
     use PhpRender;
 }
