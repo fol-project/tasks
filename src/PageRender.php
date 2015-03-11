@@ -120,6 +120,8 @@ class PageRenderTask implements TaskInterface
     /**
      * Extract and returns the data form a file
      *
+     * @param string $path
+     *
      * @return null|array
      */
     protected function getData($path)
@@ -133,7 +135,7 @@ class PageRenderTask implements TaskInterface
         switch (pathinfo($path, PATHINFO_EXTENSION)) {
             case 'yml':
             case 'yaml':
-                return Yaml::parse($file);
+                return (array) Yaml::parse($file);
 
             case 'json':
                 return json_decode(file_get_contents($file), true);

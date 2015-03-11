@@ -10,6 +10,11 @@ use Robo\Contract\TaskInterface;
  */
 trait Config
 {
+    /**
+     * Init a config task
+     *
+     * @param FolConfig $config
+     */
     protected function taskConfig(FolConfig $config)
     {
         return new ConfigTask($config);
