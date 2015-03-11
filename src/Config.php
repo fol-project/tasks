@@ -1,6 +1,7 @@
 <?php
 namespace Fol\Tasks;
 
+use Fol\Config as FolConfig;
 use Robo\Task\BaseTask;
 use Robo\Contract\TaskInterface;
 
@@ -9,41 +10,65 @@ use Robo\Contract\TaskInterface;
  */
 trait Config
 {
-    protected function taskConfig()
+    protected function taskConfig(FolConfig $config)
     {
-        return new ConfigTask();
+        return new ConfigTask($config);
     }
 }
 
 class ConfigTask extends BaseTask implements TaskInterface
 {
     protected $configs = [];
+    protected $config;
+    protected $force = false;
+
+    public function __construct(FolConfig $config)
+    {
+        $this->config = $config;
+    }
 
     /**
-     * Set config variables
+     * Set the config environment name
      *
-     * @param string|array $input     The filepath or an array with the config
-     * @param string       $output    The filename where to export the config
-     * @param array|null   $filter    Filter the values to asking for
-     * @param boolean      $overwrite Ask even if the output value is defined
+     * @param null|string $name
+     * 
+     * @return $this
      */
-    public function set($input, $output, $filter = null)
+    public function environment($name = null)
     {
-        $this->configs[] = [$input, $output, $filter, false];
+        if ($name !== null) {
+            $this->config->setEnvironment($name);
+        }
 
         return $this;
     }
 
     /**
-     * Overwrite previous variables
+     * Overwrite the configuration
      *
-     * @param string|array $input  The filepath or an array with the config
-     * @param string       $output The filename where to export the config
-     * @param array|null   $filter Filter the values to asking for
+     * @param boolean $force
+     * 
+     * @return $this
      */
-    public function overwrite($input, $output, $filter = null)
+    public function force($force = false)
     {
-        $this->configs[] = [$input, $output, $filter, true];
+        $this->force = $force;
+
+        return $this;
+    }
+
+    /**
+     * Set config variables
+     *
+     * @param string $name     The configuration name
+     * @param array  $defaults The an array with the default values
+     * @param array  $filter   Filter the values to asking for
+     * 
+     * @return $this
+     */
+    public function set($name, array $defaults = array(), array $filter = array())
+    {
+        $this->configs[] = [$name, $defaults, $filter];
 
         return $this;
     }
@@ -54,36 +79,30 @@ class ConfigTask extends BaseTask implements TaskInterface
     public function run()
     {
         foreach ($this->configs as $config) {
-            list($input, $output, $filter, $overwrite) = $config;
+            list($name, $defaults, $filter) = $config;
 
-            if (is_array($input)) {
-                $variables = $input;
-                $basename = '';
+            $oldVariables = $this->config->get($name) ?: [];
+            $path = $this->config->getPathsFor($name)[0];
+            $overwrite = !is_file($path) ? true : $this->force;
+
+            if ($defaults) {
+                $variables = array_intersect_key($oldVariables, $defaults) + $defaults;
             } else {
-                $variables = require $input;
-                $basename = pathinfo($input, PATHINFO_FILENAME).'.';
+                $variables = $oldVariables;
             }
 
-            if (is_file($output)) {
-                $oldValues = require $output;
-            } else {
-                $oldValues = [];
+            foreach ($variables as $k => &$value) {
+                $this->askConfig($name, $k, $value, (isset($oldVariables[$k]) ? $oldVariables[$k] : null), $filter, $overwrite);
             }
 
-            $variables = array_replace_recursive($variables, $oldValues);
-
-            foreach ($variables as $name => &$value) {
-                $this->askConfig($basename, $name, $value, $overwrite, $oldValues, $filter);
-            }
-
-            $dir = pathinfo($output, PATHINFO_DIRNAME);
+            $dir = pathinfo($path, PATHINFO_DIRNAME);
 
             if (!is_dir($dir)) {
                 mkdir($dir, 0777, true);
             }
 
-            file_put_contents($output, "<?php\n\nreturn ".var_export($variables, true).';');
-            $this->printTaskInfo("Config saved in {$output}");
+            file_put_contents($path, "<?php\n\nreturn ".var_export($variables, true).';');
+            $this->printTaskInfo("Config saved in {$path}");
         }
     }
 
@@ -93,20 +112,26 @@ class ConfigTask extends BaseTask implements TaskInterface
      * @param string     $basename
      * @param string     $name
      * @param mixed      &$value
-     * @param boolean    $overwrite
-     * @param null|array $oldValues
+     * @param mixed      &$oldValue
      * @param null|array $filter
+     * @param boolean    $force
      */
-    private function askConfig($basename, $name, &$value, $overwrite, array $oldValues = null, array $filter = null)
+    private function askConfig($basename, $name, &$value, $oldValue, array $filter, $force)
     {
         if (is_array($value)) {
             foreach ($value as $n => &$v) {
-                $this->askConfig("{$basename}{$name}.", $n, $v, $overwrite, isset($oldValues[$name]) ? $oldValues[$name] : null, $filter);
+                $this->askConfig("{$basename}.{$name}", $n, $v, isset($oldValue[$n]) ? $oldValue[$n] : null, $filter, $force);
             }
-        } else {
-            if ((!isset($oldValues[$name]) || $overwrite) && (empty($filter) || in_array($name, $filter))) {
-                $value = $this->askDefault("Value for: {$basename}{$name}", $value);
-            }
+
+            return;
+        }
+
+        if (!empty($filter) && !in_array($name, $filter)) {
+            return;
+        }
+
+        if ($force || !isset($oldValue)) {
+            $value = $this->askDefault("Value for: {$basename}.{$name}", $value);
         }
     }
 }
