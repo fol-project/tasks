@@ -36,7 +36,7 @@ class ConfigTask extends BaseTask implements TaskInterface
      * Set the config environment name
      *
      * @param null|string $name
-     * 
+     *
      * @return $this
      */
     public function environment($name = null)
@@ -52,7 +52,7 @@ class ConfigTask extends BaseTask implements TaskInterface
      * Overwrite the configuration
      *
      * @param boolean $force
-     * 
+     *
      * @return $this
      */
     public function force($force = false)
@@ -68,7 +68,7 @@ class ConfigTask extends BaseTask implements TaskInterface
      * @param string $name     The configuration name
      * @param array  $defaults The an array with the default values
      * @param array  $filter   Filter the values to asking for
-     * 
+     *
      * @return $this
      */
     public function set($name, array $defaults = array(), array $filter = array())
