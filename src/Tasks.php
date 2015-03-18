@@ -8,4 +8,5 @@ class Tasks extends BaseTasks
     use Config;
     use PageRender;
     use PhpRender;
+    use GettextScanner;
 }
