@@ -4,10 +4,8 @@ namespace Fol\Tasks;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use RecursiveRegexIterator;
 use RegexIterator;
 use Iterator;
-
 use League\Plates\Engine;
 use Robo\Result;
 use Robo\Contract\TaskInterface;
@@ -143,7 +141,7 @@ class PageRenderTask implements TaskInterface
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
-        
+
         file_put_contents($dest, $content);
     }
 
