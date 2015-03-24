@@ -104,7 +104,7 @@ class GettextScannerTask extends BaseTask implements TaskInterface
     {
         foreach ($this->iterator as $each) {
             foreach ($each as $file) {
-                if (!$file || !$file->isFile()) {
+                if ($file === null || !$file->isFile()) {
                     continue;
                 }
 

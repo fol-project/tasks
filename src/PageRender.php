@@ -1,6 +1,13 @@
 <?php
 namespace Fol\Tasks;
 
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveRegexIterator;
+use RegexIterator;
+use Iterator;
+
 use League\Plates\Engine;
 use Robo\Result;
 use Robo\Contract\TaskInterface;
@@ -37,6 +44,25 @@ class PageRenderTask implements TaskInterface
         } else {
             $this->templates = new Engine($templates);
         }
+
+        $this->templates->registerFunction('getData', function ($file) {
+            return static::getData("{$this->origin}/{$file}");
+        });
+
+        return $this;
+    }
+
+    /**
+     * Register a function for the template
+     *
+     * @param string   $name
+     * @param callable $fn
+     *
+     * @return $this
+     */
+    public function registerFunction($name, callable $fn)
+    {
+        $this->templates->registerFunction($name, $fn);
 
         return $this;
     }
@@ -84,16 +110,14 @@ class PageRenderTask implements TaskInterface
     /**
      * Scan the data directory searching by data pages
      *
-     * @return array
+     * @return Iterator
      */
     protected function getPages()
     {
-        $cwd = getcwd();
-        chdir($this->origin);
-        $files = glob('{*.yml,*.yaml,*.json,*.php}', GLOB_BRACE);
-        chdir($cwd);
+        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME);
+        $iterator = new RecursiveIteratorIterator($directory);
 
-        return $files;
+        return new RegexIterator($iterator, '/\.(yml|yaml|json|php)$/');
     }
 
     /**
@@ -103,7 +127,7 @@ class PageRenderTask implements TaskInterface
      */
     protected function render($file)
     {
-        $data = $this->getData($file);
+        $data = static::getData($file);
 
         if (empty($data['template'])) {
             return;
@@ -112,8 +136,14 @@ class PageRenderTask implements TaskInterface
         $content = $this->templates->render($data['template'], $data);
 
         $dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', '.html', $file);
-        $dest = "{$this->destination}/{$dest}";
+        $dest = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $dest);
 
+        $dir = dirname($dest);
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        
         file_put_contents($dest, $content);
     }
 
@@ -124,15 +154,13 @@ class PageRenderTask implements TaskInterface
      *
      * @return null|array
      */
-    protected function getData($path)
+    public static function getData($file)
     {
-        $file = "{$this->origin}/{$path}";
-
         if (!is_file($file)) {
             throw new \Exception("The file {$file} does not exist");
         }
 
-        switch (pathinfo($path, PATHINFO_EXTENSION)) {
+        switch (pathinfo($file, PATHINFO_EXTENSION)) {
             case 'yml':
             case 'yaml':
                 return (array) Yaml::parse($file);
