@@ -148,7 +148,7 @@ class PageRenderTask implements TaskInterface
     /**
      * Extract and returns the data form a file
      *
-     * @param string $path
+     * @param string $file
      *
      * @return null|array
      */
