@@ -28,7 +28,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
     protected $templates;
     protected $origin;
     protected $destination;
-    protected $suffix = '.html';
+    protected $suffixes = [];
 
     /**
      * Set the template engine
@@ -99,12 +99,13 @@ class PageRenderTask extends BaseTask implements TaskInterface
      * Set the suffix used to save the html pages
      *
      * @param string $suffix
+     * @param string $regex  Regex used to know which files apply to
      *
      * @return $this
      */
-    public function suffix($suffix)
+    public function suffix($suffix, $regex = '/.*/')
     {
-        $this->suffix = $suffix;
+        $this->suffixes[] = [$suffix, $regex];
 
         return $this;
     }
@@ -154,8 +155,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
 
         $content = $this->templates->render($data['template'], $data);
 
-        $dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', $this->suffix, $file);
-        $dest = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $dest);
+        $dest = $this->getDestinationPath($file);
 
         $dir = dirname($dest);
 
@@ -164,6 +164,27 @@ class PageRenderTask extends BaseTask implements TaskInterface
         }
 
         file_put_contents($dest, $content);
+    }
+
+    /**
+     * Returns the destination path for a page
+     * 
+     * @param string $file
+     * 
+     * @return string
+     */
+    protected function getDestinationPath($file)
+    {
+        $destination_path = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $file);
+
+        foreach ($this->suffixes as $suffix) {
+            if (preg_match($suffix[1], $destination_path)) {
+                return preg_replace('/\.'.pathinfo($destination_path, PATHINFO_EXTENSION).'$/', $suffix[0], $destination_path);
+            }
+        }
+
+        //default
+        return preg_replace('/\.'.pathinfo($destination_path, PATHINFO_EXTENSION).'$/', '.html', $destination_path);
     }
 
     /**
