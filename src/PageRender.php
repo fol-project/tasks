@@ -168,9 +168,9 @@ class PageRenderTask extends BaseTask implements TaskInterface
 
     /**
      * Returns the destination path for a page
-     * 
+     *
      * @param string $file
-     * 
+     *
      * @return string
      */
     protected function getDestinationPath($file)
