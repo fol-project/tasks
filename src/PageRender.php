@@ -9,6 +9,7 @@ use Iterator;
 use League\Plates\Engine;
 use Robo\Result;
 use Robo\Contract\TaskInterface;
+use Robo\Task\BaseTask;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -22,7 +23,7 @@ trait PageRender
     }
 }
 
-class PageRenderTask implements TaskInterface
+class PageRenderTask extends BaseTask implements TaskInterface
 {
     protected $templates;
     protected $origin;
@@ -120,7 +121,7 @@ class PageRenderTask implements TaskInterface
             ++$t;
         }
 
-        $this->printTaskInfo("{$t} pages generated and saved into {$this->origin}");
+        $this->printTaskInfo("<fg=yellow>{$t}</fg=yellow> pages generated and saved in <info>{$this->destination}</info>");
 
         return Result::success($this);
     }
