@@ -27,6 +27,7 @@ class PageRenderTask implements TaskInterface
     protected $templates;
     protected $origin;
     protected $destination;
+    protected $suffix = '.html';
 
     /**
      * Set the template engine
@@ -94,13 +95,32 @@ class PageRenderTask implements TaskInterface
     }
 
     /**
+     * Set the suffix used to save the html pages
+     *
+     * @param string $suffix
+     *
+     * @return $this
+     */
+    public function suffix($suffix)
+    {
+        $this->suffix = $suffix;
+
+        return $this;
+    }
+
+    /**
      * Run the task
      */
     public function run()
     {
+        $t = 0;
+
         foreach ($this->getPages() as $page) {
             $this->render($page);
+            ++$t;
         }
+
+        $this->printTaskInfo("{$t} pages generated and saved into {$this->origin}");
 
         return Result::success($this);
     }
@@ -133,7 +153,7 @@ class PageRenderTask implements TaskInterface
 
         $content = $this->templates->render($data['template'], $data);
 
-        $dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', '.html', $file);
+        $dest = preg_replace('/\.'.pathinfo($file, PATHINFO_EXTENSION).'$/', $this->suffix, $file);
         $dest = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $dest);
 
         $dir = dirname($dest);
