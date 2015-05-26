@@ -58,7 +58,7 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
 
     /**
      * Add operations
-     * 
+     *
      * @see \Imagecow\Libs\Libinterface
      *
      * @return $this
