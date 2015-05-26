@@ -9,4 +9,5 @@ class Tasks extends BaseTasks
     use PageRender;
     use PhpRender;
     use GettextScanner;
+    use ImageManipulation;
 }
