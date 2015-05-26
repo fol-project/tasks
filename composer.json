@@ -23,6 +23,7 @@
 		"gettext/gettext": "*",
 		"codegyre/robo": "0.5.*",
 		"league/plates": "~3.1",
+		"imagecow/imagecow": "*",
 		"symfony/yaml": "~2.6"
 	},
 	"autoload": {
