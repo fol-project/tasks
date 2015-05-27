@@ -78,7 +78,7 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
         $t = 0;
 
         foreach ($this->getImages() as $image) {
-            $this->convert($image);
+            $this->convert((string) $image);
             ++$t;
         }
 
@@ -94,7 +94,7 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
      */
     protected function getImages()
     {
-        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME);
+        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($directory);
 
         return new RegexIterator($iterator, '/\.(jpg|jpeg|gif|png)$/');
