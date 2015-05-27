@@ -26,6 +26,7 @@ trait PageRender
 class PageRenderTask extends BaseTask implements TaskInterface
 {
     protected $templates;
+    protected $callbacks = [];
     protected $origin;
     protected $destination;
     protected $suffixes = [];
@@ -96,6 +97,34 @@ class PageRenderTask extends BaseTask implements TaskInterface
     }
 
     /**
+     * Set a custom callback before render each page
+     *
+     * @param callable $callback
+     *
+     * @return $this
+     */
+    public function beforeRender(callable $callback)
+    {
+        $this->callbacks['before'] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Set a custom callback after render each page
+     *
+     * @param callable $callback
+     *
+     * @return $this
+     */
+    public function afterRender(callable $callback)
+    {
+        $this->callbacks['after'] = $callback;
+
+        return $this;
+    }
+
+    /**
      * Set the suffix used to save the html pages
      *
      * @param string $suffix
@@ -118,7 +147,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
         $t = 0;
 
         foreach ($this->getPages() as $page) {
-            $this->render($page);
+            $this->render((string) $page);
             ++$t;
         }
 
@@ -134,7 +163,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
      */
     protected function getPages()
     {
-        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME);
+        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($directory);
 
         return new RegexIterator($iterator, '/\.(yml|yaml|json|php)$/');
@@ -147,23 +176,31 @@ class PageRenderTask extends BaseTask implements TaskInterface
      */
     protected function render($file)
     {
-        $data = static::getData($file);
+        $data = static::getData((string) $file);
+        $dest = $this->getDestinationPath((string) $file);
+
+        if (isset($this->callbacks['before'])) {
+            $this->callbacks['before']($file, $dest, $data);
+        }
 
         if (empty($data['template'])) {
             return;
         }
 
         $content = $this->templates->render($data['template'], $data);
+        $fulldest = $this->destination.$dest;
 
-        $dest = $this->getDestinationPath($file);
-
-        $dir = dirname($dest);
+        $dir = dirname($fulldest);
 
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
 
-        file_put_contents($dest, $content);
+        file_put_contents($fulldest, $content);
+
+        if (isset($this->callbacks['after'])) {
+            $this->callbacks['after']($file, $dest, $content);
+        }
     }
 
     /**
@@ -175,7 +212,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
      */
     protected function getDestinationPath($file)
     {
-        $destination_path = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $file);
+        $destination_path = preg_replace('/^'.preg_quote($this->origin, '/').'/', '', $file);
 
         foreach ($this->suffixes as $suffix) {
             if (preg_match($suffix[1], $destination_path)) {
