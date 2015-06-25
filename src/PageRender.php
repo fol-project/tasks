@@ -240,7 +240,7 @@ class PageRenderTask extends BaseTask implements TaskInterface
         switch (pathinfo($file, PATHINFO_EXTENSION)) {
             case 'yml':
             case 'yaml':
-                return (array) Yaml::parse($file);
+                return (array) Yaml::parse(file_get_contents($file));
 
             case 'json':
                 return json_decode(file_get_contents($file), true);
