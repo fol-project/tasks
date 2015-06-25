@@ -14,9 +14,9 @@ use Robo\Task\BaseTask;
 /**
  * Trait to generate pages with data and templates
  */
-trait PageRender
+trait ImageManipulation
 {
-    protected function taskPageRender()
+    protected function taskImageManipulation()
     {
         return new ImageManipulationTask();
     }
@@ -58,7 +58,7 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
 
     /**
      * Add operations
-     * 
+     *
      * @see \Imagecow\Libs\Libinterface
      *
      * @return $this
@@ -78,11 +78,11 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
         $t = 0;
 
         foreach ($this->getImages() as $image) {
-            $this->convert($image);
+            $this->convert((string) $image);
             ++$t;
         }
 
-        $this->printTaskInfo("<fg=yellow>{$t}</fg=yellow> pages generated and saved in <info>{$this->destination}</info>");
+        $this->printTaskInfo("<fg=yellow>{$t}</fg=yellow> images manipulated and saved in <info>{$this->destination}</info>");
 
         return Result::success($this);
     }
@@ -94,7 +94,7 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
      */
     protected function getImages()
     {
-        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME);
+        $directory = new RecursiveDirectoryIterator($this->origin, FilesystemIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($directory);
 
         return new RegexIterator($iterator, '/\.(jpg|jpeg|gif|png)$/');
@@ -109,10 +109,8 @@ class ImageManipulationTask extends BaseTask implements TaskInterface
     {
         $image = Image::createFromFile($file);
 
-        foreach ($this->operations as $arguments) {
-            $name = array_shift($arguments);
-
-            call_user_func_array([$image, $name], $arguments);
+        foreach ($this->operations as $operation) {
+            call_user_func_array([$image, $operation[0]], $operation[1]);
         }
 
         $destination_path = preg_replace('/^'.preg_quote($this->origin, '/').'/', $this->destination, $file);
