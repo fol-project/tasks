@@ -19,7 +19,6 @@
 	},
 	"require": {
 		"php": ">=5.5.0",
-		"fol/core": "*",
 		"gettext/gettext": "*",
 		"codegyre/robo": "0.5.*",
 		"league/plates": "~3.1",
