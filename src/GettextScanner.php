@@ -77,15 +77,15 @@ class GettextScannerTask extends BaseTask implements TaskInterface
     public function run()
     {
         foreach ($this->targets as $target) {
+            $translations = new Translations();
+
+            $this->scan($translations);
+
             if (is_file($target)) {
                 $fn = $this->getFunctionName('from', $target, 'File');
 
-                $translations = Translations::$fn($target);
-            } else {
-                $translations = new Translations();
+                $translations->mergeWith(Translations::$fn($target), Translations::MERGE_HEADERS | Translations::MERGE_LANGUAGE | Translations::MERGE_PLURAL | Translations::MERGE_COMMENTS);
             }
-
-            $this->scan($translations);
 
             $fn = $this->getFunctionName('to', $target, 'File');
 
@@ -108,10 +108,10 @@ class GettextScannerTask extends BaseTask implements TaskInterface
                     continue;
                 }
 
-                if (($fn = $this->getFunctionName('', $file->getPathname(), ''))) {
-                    $fn = "Gettext\\Extractors\\{$fn}::fromFile";
+                $target = $file->getPathname();
 
-                    call_user_func($fn, $file->getPathname(), $translations);
+                if (($fn = $this->getFunctionName('addFrom', $target, 'File'))) {
+                    $translations->$fn($target);
                 }
             }
         }
@@ -121,6 +121,8 @@ class GettextScannerTask extends BaseTask implements TaskInterface
      * Get the format based in the extension
      *
      * @param string $file
+     *
+     * @return string|null
      */
     private function getFunctionName($prefix, $file, $suffix)
     {
