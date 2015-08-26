@@ -1,8 +1,8 @@
 {
 	"name": "fol/tasks",
 	"type": "library",
-	"description": "Robo tasks for Fol framework",
-	"keywords": ["http"],
+	"description": "Generic tasks build on top of Robo",
+	"keywords": ["gettext", "image", "manipulation", "html", "render", "templates"],
 	"homepage": "https://github.com/fol-project/tasks",
 	"license": "MIT",
 	"authors": [
